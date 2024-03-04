@@ -16,12 +16,17 @@ class UserController {
   */
 
 	async create(request, response) {
-		const { name, email, password } = request.body;
+		const { name, email, password, confirmPassword } = request.body;
 
 		const userRepository = new UserRepository();
 		const userService = new UserService(userRepository);
 
-		const userCreate = await userService.create({ name, email, password });
+		const userCreate = await userService.create({
+			name,
+			email,
+			password,
+			confirmPassword,
+		});
 		return response.status(201).json(userCreate);
 	}
 }
