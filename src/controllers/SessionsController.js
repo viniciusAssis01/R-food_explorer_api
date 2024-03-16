@@ -10,7 +10,7 @@ class SessionsController {
 
 		const login = await sessionService.create({ email, password, response });
 
-		response.status(201).json(login);
+		return response.status(201).json(login);
 	}
 }
 
