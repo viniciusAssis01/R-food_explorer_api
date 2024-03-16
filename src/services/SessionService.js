@@ -35,7 +35,7 @@ class SessionService {
 
 		delete user.password;
 
-		return { token, user };
+		return { user };
 	}
 }
 

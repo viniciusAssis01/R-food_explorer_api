@@ -56,17 +56,15 @@ class DishController {
 			const filterIngredient = ingredients
 				.split(",")
 				.map((ingredient) => ingredient.trim());
-			//console.log(filterIngredient);
 
 			dishes = await knex("ingredients")
 				.select(["ingredients.id", "ingredients.name", "dishes.*"])
-				/* .whereLike("dishes.name", `%${name}%`) */
 				.whereIn("ingredients.name", filterIngredient)
 				.innerJoin("dishes", "dishes.id", "ingredients.dish_id")
 				.orderBy("dishes.name");
 		} else if (name) {
 			dishes = await knex("dishes")
-				.whereLike("name", `%${name}%`)
+				.whereLike("dishes.name", `%${name}%`)
 				.orderBy("name");
 		} else {
 			dishes = await knex("dishes").orderBy("dishes.name");
@@ -86,30 +84,16 @@ class DishController {
 			throw new AppError("Prato não encontrado", 401);
 		}
 
-		const dishIngredients = await knex("ingredients")
-			.where({ dish_id: id })
-			.orderBy("name");
+		const dishUpdate = {
+			name: name ?? dish.name,
+			category: category ?? dish.category,
+			price: price ?? dish.price,
+			description: description ?? dish.description,
+			image: image ?? dish.image,
+			updated_at: knex.fn.now(),
+		};
 
-		if (!dishIngredients) {
-			throw new AppError("Ingredientes não encontrados", 401);
-		}
-
-		dish.name = name ?? dish.name;
-		dish.category = category ?? dish.category;
-		dish.price = price ?? dish.price;
-		dish.description = description ?? dish.description;
-		dish.image = image ?? dish.image;
-
-		await knex("dishes")
-			.update({
-				name: dish.name,
-				category: dish.category,
-				price: dish.price,
-				description: dish.description,
-				image: dish.image,
-				updated_at: knex.fn.now(),
-			})
-			.where({ id });
+		await knex("dishes").update(dishUpdate).where({ id });
 
 		await knex("ingredients").where({ dish_id: id }).delete();
 
@@ -142,8 +126,6 @@ class DishController {
 		}
 
 		await knex("dishes").where({ id }).delete();
-
-		//alert("Prato excluído com sucesso");
 
 		return response.status(200).json({ message: "Prato excluído com sucesso" });
 	}
